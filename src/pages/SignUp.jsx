@@ -2,7 +2,7 @@ import React,{useState} from 'react'
 import {Link} from 'react-router-dom'
 import { useNavigate } from 'react-router-dom';
 import {auth,db} from '../lib/firebaseConfig';
-import {createUserWithEmailAndPassword,updateEmail,updateProfile} from 'firebase/auth';
+import {createUserWithEmailAndPassword} from 'firebase/auth';
 import { collection, addDoc } from 'firebase/firestore';
 
 const SignUp = () => {
@@ -34,6 +34,7 @@ const SignUp = () => {
         const collectionRef = collection(db,'user')
         await addDoc(collectionRef,{
           candidateId:'',
+          email,
           phoneNumber,
           userId:credentials.user.uid,
         })

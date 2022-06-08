@@ -16,7 +16,7 @@ const useAuth = () => {
         return ()=>{
             subscriber()
         }
-    },[auth])
+    },[])
 
     return {userAuth} 
 }

@@ -1,18 +1,18 @@
-import React,{useState} from 'react'
+import React,{useState,useEffect} from 'react'
 import {Link,useParams} from 'react-router-dom'
 import { useNavigate } from 'react-router-dom';
-import { addCandidate } from '../servies';
+import { getCandidate,updateCandidate } from '../servies';
 
-const AddCandidate = () => {
+const EditCandidate = () => {
   const [candName,setCandName] = useState('')
   const [dob,setDob] = useState('')
   const [age,setAge] = useState('')
   const [address,setAddress] = useState('')
-  const [state,setState] = useState('shortlist')
+  const [state,setState] = useState('')
   const [pinCode,setPinCode] = useState('')
   const [error,setError] = useState('')
   const navigate = useNavigate()
-  const {currentUserId} = useParams()
+  const {candDocId} = useParams()
   
   const handleForm = async(e) => {
     e.preventDefault();
@@ -29,8 +29,8 @@ const AddCandidate = () => {
     }else if(isNaN(age) || age < 1  || age > 100){
       setError('Invalid age')
     }else{
-      await addCandidate(currentUserId,candName,dob,age,address,state,pinCode,)
-      navigate('/')
+        await updateCandidate(candDocId,candName,dob,age,address,state,pinCode)
+        navigate('/')
     }
     //remove error after some time
     setTimeout(() => {
@@ -38,9 +38,22 @@ const AddCandidate = () => {
     }, 3000);
     return null;
   }
+  useEffect(()=>{
+    const fetchCandidate = async()=>{
+        const candidate = await getCandidate(candDocId)
+        const {pincode,name,age,address,status,dob} = candidate
+        setAddress(address)
+        setCandName(name)
+        setPinCode(pincode)
+        setAge(age)
+        setState(status)
+        setDob(dob)
+    }
+    fetchCandidate()
+  },[candDocId])
   return (
     <main className='md:w-[50%] relative top-[4rem] w-full m-auto border shadow-xl'>
-        <div className='my-4 md:w-[90%]  w-[95%] m-auto font-medium'>Create Candidate</div>
+        <div className='my-4 md:w-[90%]  w-[95%] m-auto font-medium'>Edit Candidate</div>
         {error.length > 0 ?<div className='text-center my-4 text-red-500 font-medium'>{error}</div> :null }
         <form onSubmit={(e)=>handleForm(e)} className=' w-full'>
           <div className='flex-col items-baseline w-full sm:flex-row flex'>
@@ -119,10 +132,10 @@ const AddCandidate = () => {
           </div>
           <div className='flex justify-end space-x-4 mr-4 my-4'>
             <Link to={'/'} className='btn-primary px-[3rem] py-3 border rounded text-black bg-white text-center'>Cancel</Link>
-            <button className='btn-primary px-[3rem] py-3 rounded text-white text-center'>Create</button>
+            <button className='btn-primary px-[3rem] py-3 rounded text-white text-center'>Update</button>
           </div>
         </form>
       </main>
   )
 }
-export default AddCandidate
+export default EditCandidate

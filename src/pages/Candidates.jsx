@@ -4,14 +4,24 @@ import {RiDeleteBinLine} from 'react-icons/ri'
 import {AiOutlinePlus} from 'react-icons/ai'
 import { Link } from 'react-router-dom'
 import useAuth from '../hooks/userAuth'
-import {getCandidates} from '../servies'
+import {getCandidates,deleteCandidate,editCandidateStatus} from '../servies'
 
 const Candidates = () => {
   const [candidates,setCandidates] = useState([])
-  const [password,setPassword] = useState('')
-  const [phoneNumber,setphoneNumber] = useState();
-  const [error,setError] = useState('')
   const {userAuth:{uid: currentAuthUserId}} = useAuth();
+  
+  const removeCandidate = async(candId) =>{
+    await deleteCandidate(candId)
+    const fetchCadidates = await getCandidates(currentAuthUserId)
+    setCandidates(fetchCadidates)
+  }
+  
+  const updateCandidateStatus = async(candId,candStatus) =>{
+    await editCandidateStatus(candId,candStatus)
+    const fetchCadidates = await getCandidates(currentAuthUserId)
+    setCandidates(fetchCadidates)
+  }
+  
   useEffect(()=>{
     const fetchCadidates = async()=>{
       const fetchCadidates = await getCandidates(currentAuthUserId)
@@ -22,13 +32,13 @@ const Candidates = () => {
     }
   },[currentAuthUserId])
   return (
-    <main className='w-[80%] m-auto border '>
+    <main className='w-[80%] m-auto border'>
       <div>
-        Candidates List :{candidates.length > 0 ? candidates.length : 'loading..'}
-      </div>    
+        Candidates List :{candidates.length > 0 ? candidates.length : 0}
+      </div>
       <div className="relative overflow-x-auto">
-          <table className="w-full text-sm text-left bg-white">
-            <thead className="text-xs text-gray-500  bg-white">
+        <table className="w-full text-sm text-left bg-white">
+            <thead className="text-xs text-gray-500  bg-white text-center">
             <tr>
             <th scope="col" className="p-4">
             </th>
@@ -44,71 +54,56 @@ const Candidates = () => {
             <th scope="col" className="px-6 py-3">
             Result
             </th>
-            {/* <th scope="col" className="px-6 py-3">
-            <span className="sr-only">Edit</span>
-            </th> */}
             </tr>
             </thead>
-            <tbody>
+      {
+        candidates ?
+        candidates.map((cand,index)=>{
+          return(
+            <tbody key={cand.docId}>
             <tr className="table-primary border-b ">
             <td className="w-4 p-4">
             <div className="flex items-center">
-            <div>1</div>
+            <div>{index+1}</div>
             </div>
             </td>
-            <th scope="row" className="px-6 py-4 font-medium text-black whitespace-nowrap">
-              Apple MacBook Pro 17"
+            <th scope="row" className="px-6 py-4 font-medium text-black whitespace-nowrap  text-center">
+              {cand.name}
             </th>
-            <td className="px-6 py-4">
-            Sliver
+            <td className="px-6 py-4 text-center">
+            {cand.dob}
             </td>
-            <td className="px-6 py-4">
-            Laptop
+            <td className="px-6 py-4 text-center">
+              {cand.email}
             </td>
-            <td className="px-6 py-4">
-            $2999
+            <td className="px-6 py-4 text-center">
+                <select 
+                className='outline-none text-sm px-4 bg-[#CDF0EA]'
+                name="state"
+                id="state"
+                value={cand.status}
+                onChange={({target})=>updateCandidateStatus(cand.docId,target.value)}>
+                  <option  value="shortlist">Shortlist</option>
+                  <option value="reject">Reject</option>
+                </select>
             </td>
-            <td className="px-6 py-4 text-right space-x-4">
-              <button className='text-2xl text-primary'>
+            <td className="px-6 py-4 text-right space-x-4 flex items-baseline">
+              <Link  to={`/edit-candidate/${cand.docId}`} className='text-2xl text-primary'>
                 <BiPencil/>
-              </button>
-              <button className='text-2xl text-primary'>
-                <RiDeleteBinLine/>
-              </button>
-            </td>
-            </tr>
-      
-            <tr className="bg-white ">
-            <td className="w-4 p-4">
-            <div className="flex items-center">
-            <div>2</div>
-            </div>
-            </td>
-            <th scope="row" className="px-6 py-4 font-medium whitespace-nowrap">
-            Magic Mouse 2
-            </th>
-            <td className="px-6 py-4">
-            Black
-            </td>
-            <td className="px-6 py-4">
-            Accessories
-            </td>
-            <td className="px-6 py-4">
-            $99
-            </td>
-            <td className="px-6 py-4 text-right space-x-4">
-              <button className='text-2xl text-primary'>
-                  <BiPencil/>
-              </button>
-              <button className='text-2xl text-primary'>
+              </Link>
+              <button className='text-2xl text-primary' onClick={()=> removeCandidate(cand.docId)}>
                 <RiDeleteBinLine/>
               </button>
             </td>
             </tr>
             </tbody>
-          </table>
+          )
+        })
+        : null
+      }    
+      </table>
       </div>
-      <Link className='flex items-baseline text-primary' to={'/add-candidate'}>
+      <Link className='flex items-baseline text-primary' to={`/add-candidate/${currentAuthUserId}`}>
         <AiOutlinePlus/>  Add new candidate
       </Link>
     </main>

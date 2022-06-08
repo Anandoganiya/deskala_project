@@ -25,7 +25,7 @@ const LogIn = () => {
       setError('password should have atleast 1 uppercase ,1 lowercase, 1 numeric, 1 special character')
     }else{
       try {
-        const res = await signInWithEmailAndPassword(auth,email,password)
+        await signInWithEmailAndPassword(auth,email,password)
         setError('')
         navigate('/')
       } catch (error) {
